@@ -1,7 +1,7 @@
 ## The SDR stuff
 
 ### Argo
-Argo is the management interface for the SDR.  This site is only available to privleged library affiliated users and gives them an administrators UI. Argo is a frontend to the functions provided by the dor-services-app.
+Argo is the management interface for the SDR.  This site is only available to privileged library affiliated users and gives them an administrators UI. Argo is a frontend to the functions provided by the dor-services-app.
 
 ### dor-services-app (DSA)
 This is the internal API for managing the SDR.  It has a direct connection to the persistence layer and all other systems write/read from the persisted data through DSA. 
