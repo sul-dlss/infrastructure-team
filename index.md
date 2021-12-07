@@ -1,6 +1,6 @@
 ## Infrastructure responsibilities
 
-* [SDR](sdr/index)
+* [The Stanford Digital Repository (SDR)](sdr/index)
 * KSR
 * sul_pub
 * Sinopia
