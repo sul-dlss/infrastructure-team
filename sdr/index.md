@@ -1,4 +1,4 @@
-## The SDR stuff
+## The Stanford Digital Repository Service Catalog
 
 ### Argo
 Argo is the management interface for the SDR.  This site is only available to privileged library affiliated users and gives them an administrators UI. Argo is a frontend to the functions provided by the dor-services-app.
