@@ -1,4 +1,4 @@
-## Infrastructure responsibilities
+## Infrastructure services
 
 * [The Stanford Digital Repository (SDR)](sdr/index)
 * KSR
