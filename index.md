@@ -1,6 +1,6 @@
 ## Infrastructure responsibilities
 
-* [SDR](sdr)
+* [SDR](sdr/index)
 * KSR
 * sul_pub
 * Sinopia
