@@ -18,6 +18,9 @@ Students can deposit thesis and dissertations into the repository
 ### h2
 Stanford affiliated users can self deposit. The previous iteration of this software was called "Hydrus", the newest version is "h2".
 
+### dor-indexing-app
+Creates a solr representation of the objects and writes it to Solr. This solr index is used for Argo and for dor-services-app since the Fedora 3 repository has no query capabilities.
+
 ### Pre-assembly
 ### preservation
 ### robots
