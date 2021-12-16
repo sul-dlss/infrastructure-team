@@ -4,7 +4,7 @@ The SDR passes RabbitMQ messages for the following use cases:
 
 * [h2](index#h2) is notified when an item is registered
 * [h2](index#h2) is notified when an item is deposited
-* [h2](index#h2)] is notified when an embargo is lifted
+* [h2](index#h2) is notified when an embargo is lifted
 * [dor-indexing-app](index#dor-indexing-app) will be (coming soon) notified when an item needs to be indexed
 
 These messages are produced by:
