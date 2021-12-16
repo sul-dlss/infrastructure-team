@@ -2,16 +2,16 @@
 
 The SDR passes RabbitMQ messages for the following use cases:
 
-* (h2)[index#h2] is notified when an item is registered
-* (h2)[index#h2] is notified when an item is deposited
-* (h2)[index#h2] is notified when an embargo is lifted
-* (dor-indexing-app)[index#dor-indexing-app] will be (coming soon) notified when an item needs to be indexed
+* [h2](index#h2) is notified when an item is registered
+* [h2](index#h2) is notified when an item is deposited
+* [h2](index#h2)] is notified when an embargo is lifted
+* [dor-indexing-app](index#dor-indexing-app) will be (coming soon) notified when an item needs to be indexed
 
 These messages are produced by:
 
-(dor-services-app)[index#dor-services-app] sends messages when an item is updated: https://github.com/sul-dlss/dor-services-app/blob/e8d7595f96c62b8b4a7c13a98618c2c66a521504/app/services/notifications/object_updated.rb
-(dor-services-app)[index#dor-services-app] sends messages when an embargo is lifted: https://github.com/sul-dlss/dor-services-app/blob/604a041dbb8d19735ee1fcd6fc0445ff614e5593/app/services/embargo_release_service.rb#L55
-(Workflow-server-rails)[index#workflow-server-rails] sends messages when an workflow step changes state: https://github.com/sul-dlss/workflow-server-rails/blob/e328f768446aa37dcd067d830f9833c7c4f36c57/app/services/send_update_message.rb#L9
+[dor-services-app](index#dor-services-app)  sends messages when an item is updated: https://github.com/sul-dlss/dor-services-app/blob/e8d7595f96c62b8b4a7c13a98618c2c66a521504/app/services/notifications/object_updated.rb
+[dor-services-app](index#dor-services-app) sends messages when an embargo is lifted: https://github.com/sul-dlss/dor-services-app/blob/604a041dbb8d19735ee1fcd6fc0445ff614e5593/app/services/embargo_release_service.rb#L55
+[workflow-server-rails](index#workflow-server-rails) sends messages when an workflow step changes state: https://github.com/sul-dlss/workflow-server-rails/blob/e328f768446aa37dcd067d830f9833c7c4f36c57/app/services/send_update_message.rb#L9
 
 The topics are:
 
