@@ -24,6 +24,8 @@ This is the internal API for managing the SDR.  It has a direct connection to th
 ### dor-indexing-app
 Creates a solr representation of the objects and writes it to Solr. This solr index is used for Argo and for dor-services-app since the Fedora 3 repository has no query capabilities.
 
+(ask JCoyne or Mike)
+
 ### Workflow Server
 _a Rails App to track the workflows associated with an object, and the state of each step and an error string for failed steps_
 
@@ -60,6 +62,13 @@ Automatically downloads books we have sent off to google for scanning.  This pro
 
 #### preservation_catalog
 
+* Catalogs all on prem and cloud copies of all preservation objects, including the status determined by the most recent audit of the object
+* Runs audits (a variety of presence and integrity checks) regularly on all on prem and cloud archive copies of preservation objects
+* has _read-only_ access to the preservation storage mounts, as none of its functionality requires manipulation of preservation storage (the only things pres cat writes to are its Postgres database cataloging the state of all of our preserved objects, the Redis instance backing its queues, and the temp space on the file system used for creating archival zips to send to S3).
+
+(ask John)
+
+
 #### preservation_robots
 
 see robots section below
@@ -83,11 +92,13 @@ Workflows implemented include `assemblyWF`, `accessionWF`, `goobiWF`, `dissemina
 * https://github.com/sul-dlss/common-accessioning/
 
 #### preservation_robots
-_robots to preserve objects being accessioned via `preservationIngestWF` formerly known as `sdrIngestWF`_
+_robots to preserve objects being accessioned via `preservationIngestWF` (formerly known as `sdrIngestWF`)_
 
 (ask Naomi, then John)
 
 * https://github.com/sul-dlss/preservation_robots/
+* These robots run on a VM with access to the filesystems used by preservation. This is the main reason they are separated from common-accessioning.
+  * The robots have write access to the preservation storage mounts, and are responsible for updating the preservation objects each time an SDR object is versioned.  preservation_catalog has _read-only_ access to the preservation storage mounts.
 
 #### gis-robots
 _robots to carry out special processing required for GIS objects via `gisAssemblyWF` and `gisDeliveryWF`_
@@ -105,6 +116,8 @@ _robots to carry out special processing required for WAS seed and crawl objects 
 * https://github.com/sul-dlss/was_robot_suite
 
 ### WAS
+
+(ask JLitt)
 
 ### GIS
 
