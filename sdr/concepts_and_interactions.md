@@ -7,9 +7,10 @@ _We started with more, but we're kinda down to three_
 
 (ask Andrew)
 
-* APO - _administrative (or admin) policy object_
-* Collection - _a collection of items, belonging to an APO_
-* Item - _an item can have files; it belongs to a (one or more?) collection_
+* APO - _administrative (or admin) policy object; every object is required to have one, it has default rights metadata values for items created under it, which determines who may manage the object._
+* Collection - _a collection of items_
+* Item - _an item can have files; it can belong to any number of collections (zero, one, or many)_
+  * Agreement - _an agreement is a subclass of the Item type; each APO has one agreement (TODO: the Agreement represents?)_
 
 ## Object Registration and Accessioning
 
@@ -24,6 +25,18 @@ How people get objects get into SDR
 ### H2
 
 Use H2 to create an object - https://github.com/sul-dlss/infrastructure-integration-test/blob/main/spec/features/create_object_h2_spec.rb
+
+### ETD
+
+Create a new ETD - https://github.com/sul-dlss/infrastructure-integration-test/blob/main/spec/features/create_etd_spec.rb
+
+### Google Books
+
+_TODO: link to code or brief explanation of gbooks accessioning_
+
+### was-registrar-app
+
+_TODO: link to code or brief explanation of was-registrar-app accessioning_
 
 ## cocina-models
 _SDR data model written as syntactically validatable with dry-struct, dry-types and openapi_
@@ -66,7 +79,7 @@ Another thing that adds indirection/confusion: sometimes the robots will perform
 
 (ask JCoyne)
 
-how are they created, stored, and what processing happens when they expire
+* Part of the cocina-model. They are expired by DSA - it emits a RabbitMQ message.
 * See integration test for ETD
 * See integration test for H2
 * Expiring - see … cron job for dor-services-app (?)
@@ -116,7 +129,7 @@ _Used to keep digital content safe, both on prem and also in the cloud_
 * How things go in
   * a [preservation_robots](https://github.com/sul-dlss/preservation_robots/) worker takes a BagIt bag containing data and metadata for a new object version, and uses that to create a new Moab (if v1 of the object) or add a new version to an existing Moab (if v2+ of the object).
   * a preservation_robots worker will also ask preservation_catalog to queue an integrity check of the new Moab version.
-* Moabs are stored on "storage roots".  There are currently 3 in production.
+* Moabs are stored on "storage roots".  There are currently 3 in production.  The storage is currently implemented on a Ceph cluster exposed the the VM via NFS mounts.
   * new content goes to the latest storage root (as configured in the storage root list given to the moab-versioning gem)
   * updates to existing content go to the Moab directory on its current storage root (which may no longer be the last storage root)
   * Moabs are stored in "druid tree" paths, which are similar to pair tree paths (e.g. druid `bc123df4567` would be `bc/123/df/4567/bc123df4567`)
@@ -154,15 +167,15 @@ _yes, Virginia, DLSS does crawl or download to get WARCs and ingest them into SD
 
 (ask JLitt or Naomi)
 
-  * was-registrar-app
-  * was_robot_suite
-  _robots to carry out special processing required for WAS seed and crawl objects_
-  * SWAP
-  * wasapi-downloader
-  * ...
+* was-registrar-app
+* was_robot_suite
+_robots to carry out special processing required for WAS seed and crawl objects_
+* SWAP
+* wasapi-downloader
+* ...
 
 ## Solr indexing of SDR
-_How we currently index SDR content for searching; the index is mostly used by Argo._
+_How we currently index SDR content for searching; the index is used by Argo and dor-services-app.  Fedora does not have robust search/query built in.  We are occasionally bitten by this non-transactional separation between metadata persistence and indexing, e.g. the occasional failure to prevent re-use of a sourceID when registering items._
 
 (ask JCoyne)
 
@@ -182,21 +195,3 @@ _A workflow tool used by DLSS digitization staff and then hooking into common-ac
 (ask Peter)
 
 - what is it, and how does it relate to SDR
-
-## sul_pub
-_system for harvest and managing publications for Stanford academic profiles, with controlled API access_
-
-(ask Peter)
-
-## DLME
-_Digital Library for the Middle East - a grant funded project to eventually be turned over to a Qatar library_
-
-(ask Aaron)
-
-## Sinopia
-_linked data apps; part of the LD4P grants_
-
-(ask JLitt)
-
-* A set of apps for cataloging using linked data (e.g. Bibframe), and for integrating linked data cataloging with the traditional ILS catalog.  The most visible application is the Sinopia Editor, which is a React front end for the Sinopia API, which is backed by a MongoDB instance (well, AWS DocumentDB).  An Airflow application, ils-middleware, handles integration with the ILS.
-* heading for Library Systems team
