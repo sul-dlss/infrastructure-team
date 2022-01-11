@@ -58,6 +58,8 @@ Automatically downloads books we have sent off to google for scanning.  This pro
 
 ### Pre-assembly
 
+Accessioners go here to create the content metadata for the files they want to accession. https://sul-preassembly-prod.stanford.edu/
+
 ### preservation
 
 #### preservation_catalog
