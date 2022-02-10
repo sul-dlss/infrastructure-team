@@ -1,4 +1,4 @@
-# Concepts, inter-service interactions, gems
+# Concepts and Interactions
 
 _A bit more focused on how the services fit together and why._
 
@@ -45,7 +45,7 @@ _SDR data model written as syntactically validatable with dry-struct, dry-types 
 
 ## Workflows and Robots
 
-Robots are what we call our individual accessioning processing steps which are grouped into "workflows", coordinated by the workflow server (and Resque and resque-pool).  They do things like updating the SDR metadata store (currently Fedora data streams), generating technical metadata, handing off to the preservation system a copy of each object version, etc.  
+Robots are what we call our individual accessioning processing steps which are grouped into "workflows", coordinated by the workflow server (and Resque and resque-pool).  They do things like updating the SDR metadata store (currently Fedora data streams), generating technical metadata, handing off to the preservation system a copy of each object version, etc.
 
 Together, workflow server and the robots provide a system for managing the SDR accessioning pipeline: the robots ingest content into the SDR; workflow server coordinates by queuing tasks to a shared Redis instance.
 

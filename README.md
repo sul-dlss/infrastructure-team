@@ -1,7 +1,5 @@
 # infrastructure-team
-Site for high level documentation of infrastructure team projects and other useful concepts, as github pages.
 
-Site is published at:
-https://sul-dlss.github.io/infrastructure-team/
+Public website for high-level documentation of DLSS Infrastructure projects and other useful concepts.
 
-Source is in gh-pages branch: https://github.com/sul-dlss/infrastructure-team/tree/gh-pages
+Published via GitHub Pages at https://sul-dlss.github.io/infrastructure-team/
