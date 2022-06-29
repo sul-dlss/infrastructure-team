@@ -179,8 +179,7 @@ _How we currently index SDR content for searching; the index is used by Argo and
 
 (ask JCoyne)
 
-* dor_indexing_app - receives a REST call when an object changes
-* Karaf, Camel, ... - the REST call to dor_indexing_app is currently queued in our ActiveMQ instance e.g. when Fedora emits a message indicating that an object was modified.
+* dor_indexing_app - subscribes to messages about object changes, and can also be triggered synchronously via HTTP
 
 ## Events (e.g. in Argo object view)
 _A way to capture an objects changes over time_
