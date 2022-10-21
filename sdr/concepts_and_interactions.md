@@ -39,19 +39,19 @@ _TODO: link to code or brief explanation of gbooks accessioning_
 _TODO: link to code or brief explanation of was-registrar-app accessioning_
 
 ## cocina-models
-_SDR data model written as syntactically validatable with dry-struct, dry-types and openapi_
+_SDR data model written as syntactically validatable with dry-struct, dry-types, and openapi_
 
 (ask JCoyne or JLitt)
 
 ## Workflows and Robots
 
-Robots are what we call our individual accessioning processing steps which are grouped into "workflows", coordinated by the workflow server (and Resque and resque-pool).  They do things like updating the SDR metadata store (currently Fedora data streams), generating technical metadata, handing off to the preservation system a copy of each object version, etc.
+Robots are what we call our individual processing steps which are grouped into "workflows", coordinated by the workflow server (and Resque and resque-pool). They do things like updating the SDR metadata store (currently Fedora data streams), generating technical metadata, handing off to the preservation system a copy of each object version, etc.
 
 Together, workflow server and the robots provide a system for managing the SDR accessioning pipeline: the robots ingest content into the SDR; workflow server coordinates by queuing tasks to a shared Redis instance.
 
-The robots inherit their worker functionality from [the lybercore gem](https://github.com/sul-dlss/lyber-core/).
+The robots inherit their worker functionality from [the lyber-core gem](https://github.com/sul-dlss/lyber-core/).
 
-Each type of robot has one or more VMs of its own, but all share the same Redis instance, and all are managed on their respective VMs by resque-pool.
+Each type of robot-suite has one or more VMs of its own, but all share the same Redis instance, and all are managed on their respective VMs by resque-pool.
 
 This architecture was chosen before open source workflow automation tools like Airflow were available/mature.
 
@@ -59,25 +59,20 @@ Another thing that adds indirection/confusion: sometimes the robots will perform
 
 (ask anyone and hand waving will occur.  Perhaps Peter? Andrew? Naomi? JCoyne? - we can re-figure out the layers of legacy code as a team)
 
-
 ## Access Rights for digital content
 
 (ask JCoyne, John)
 
 * What's an APO?
-* Where are access restrictions computed when interacting with a specific object? - various codebases use the logic provided by the dor-rights-auth gem:  https://github.com/sul-dlss/dor-rights-auth
 * How are they stored? - Currently, in the `rightsMetadata` datastream for an object (an XML datstream stored in Fedora for a druid).  Will be migrated to the Cocina data model and its JSON serialization format.
 * How do they work to restrict access?
   * Defaults are applied based on the item's parent APO
-  * An item can have multiple files, and those files may each have different rights specified from each other as well as from the parent item.  If they don't have rights specified individually, they inherit from the parent item.
+  * An item can have multiple files, and those files may each have different rights specified from each other as well as from the parent item.
 * See also
   * [Rights metadata and public access to SDR objects](https://consul.stanford.edu/display/SDRdocs/Rights+metadata+and+public+access+to+SDR+objects)
-  * [Rights metadata -- the rightsMetadata datastream](https://consul.stanford.edu/display/chimera/Rights+metadata+--+the+rightsMetadata+datastream)
   * [Argo - Editing the license and rights statements for a set of objects](https://consul.stanford.edu/display/DLSSDOCS/Argo+-+Editing+the+license+and+rights+statements+for+a+set+of+objects)
 
 ## Embargoes
-
-(ask JCoyne)
 
 * Part of the cocina-model. They are expired by DSA - it emits a RabbitMQ message.
 * See integration test for ETD
