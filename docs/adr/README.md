@@ -37,6 +37,7 @@ These ADRs record the decisions that shape the Stanford Digital Repository (SDR)
 | [0025](0025-shared-prod-solrcloud.md) | All environments' Argo indexes live on the prod SolrCloud | accepted | — | new | Deliberate: `argo_{qa,stage,prod}` on `sul-solr`. |
 | [0026](0026-shibboleth-entitlements-for-authz.md) | Staff authorization uses Shibboleth and Workgroup Manager entitlements | accepted | — | new | Apache gates on `eduPersonEntitlement`; APO roles give per-object rights. |
 | [0027](0027-geoserver-retired-cloud-optimized-gis.md) | GeoServer is retired; GIS data is served as cloud-native files | accepted | 2026-04 | new | COG, PMTiles and FlatGeobuf from stacks; no WMS/WFS. |
+| [0028](0028-adopt-ocfl-in-place.md) | Adopt OCFL for preservation storage by converting Moabs in place | proposed | — | new | OCFL 1.1 §5.5 in-place conversion with sha256; would supersede 0016's Moab format. |
 
 ## Disregarded EDA ADRs
 

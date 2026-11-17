@@ -7,7 +7,7 @@ Every accessioned version of an SDR object is preserved as a Moab, a versioned, 
 
 ## Considered options
 
-- **OCFL** for the on-prem copy. Not adopted yet: `ocfl-rb` exists in the org but preservation_catalog does not use it. SDR states that it plans to implement OCFL ([SDR About](https://sdr.library.stanford.edu/about)); [Recommendations R18](../architecture/recommendations.md#r18-migrate-preservation-storage-from-moab-to-ocfl-in-place-and-without-flag-days) sketches an in-place migration that would supersede this ADR. (OCFL was separately rejected for the access layout; [ADR 0012](0012-versioned-public-data.md).)
+- **OCFL** for the on-prem copy. Not adopted yet: `ocfl-rb` exists in the org but preservation_catalog does not use it. SDR states that it plans to implement OCFL ([SDR About](https://sdr.library.stanford.edu/about)); [Recommendations R18](../architecture/recommendations.md#r18-migrate-preservation-storage-from-moab-to-ocfl-in-place-and-without-flag-days) sketches an in-place migration, proposed in [ADR 0028](0028-adopt-ocfl-in-place.md), that would supersede this ADR's format decision. (OCFL was separately rejected for the access layout; [ADR 0012](0012-versioned-public-data.md).)
 - **Fewer or single-provider cloud copies.** The endpoint set has changed over time: IBM us-south was added in 2019 and dropped in 2026-04, and GCP was added in 2025-05. Two providers have been kept throughout.
 
 ## Consequences
