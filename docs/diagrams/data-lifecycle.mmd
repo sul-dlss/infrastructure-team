@@ -1,0 +1,56 @@
+flowchart LR
+  UI["Depositor apps (argo-b3, H3, pre-assembly, sdr-api)"]:::app
+  SURI["SURI"]:::ext
+  FOLIO["FOLIO (MARC)"]:::ext
+  DSA["dor-services-app"]:::app
+  DSADB[("DSA primary DB: cocina versions, user versions, events, tags")]:::store
+  WFDB[("DSA workflow DB: workflow_steps, version_contexts")]:::store
+  RMQ{{"RabbitMQ sdr.workflow, sdr.objects.event"}}:::queue
+  BAG[("/dor/export bag")]:::store
+  PR["preservation_robots"]:::app
+  MOAB[("Moab vNNNN on preservation storage")]:::store
+  PC[("prescat DB")]:::store
+  CLOUD[("Zip parts: AWS us-west-2, AWS us-east-1, GCP us-south1")]:::ext
+  XFER[("/access-transfer")]:::store
+  PF["purl-fetcher (MariaDB purls, public_jsons)"]:::app
+  STK[("/stacks mount (PF writes), Weka S3 (purl, stacks read)")]:::store
+  KAFKA{{"Kafka purl_fetcher, EarthWorks and sitemap_release topics"}}:::queue
+  PURL["purl: landing, json, xml, mods, IIIF"]:::app
+  STACKS["stacks and image server"]:::app
+  TRJ["searchworks_traject_indexer"]:::app
+  EW["earthworks SdrConsumer"]:::app
+  ARGO[("Solr argo_env")]:::store
+  SWS[("Solr searchworks, sw-preview")]:::store
+  EWS[("EarthWorks Solr")]:::store
+
+  UI -->|"RequestDRO, HTTPS JWT"| DSA
+  SURI -->|"druid, HTTPS"| DSA
+  FOLIO -->|"MARC, HTTPS"| DSA
+  DSA --> DSADB
+  DSA --> WFDB
+  DSA -->|"AMQP"| RMQ
+  RMQ -->|"end-accession.completed"| UI
+  DSA -->|"Solr update"| ARGO
+  DSA -->|"NFS"| BAG
+  BAG --> PR
+  PR --> MOAB
+  PR -->|"HTTPS PATCH catalog"| PC
+  MOAB -->|"S3 zip parts"| CLOUD
+  DSA -->|"NFS staged files"| XFER
+  XFER --> PF
+  DSA -->|"HTTPS PUT purls, user version N"| PF
+  PF -->|"NFS"| STK
+  PF -->|"Kafka on release or unpublish"| KAFKA
+  STK -->|"S3"| PURL
+  STK -->|"S3"| STACKS
+  KAFKA --> TRJ
+  KAFKA --> EW
+  TRJ -->|"HTTPS json, meta_json"| PURL
+  EW -->|"HTTPS json"| PURL
+  TRJ --> SWS
+  EW --> EWS
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+  classDef queue fill:#eefbea,stroke:#2f855a;

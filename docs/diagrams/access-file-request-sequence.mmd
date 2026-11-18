@@ -1,0 +1,27 @@
+sequenceDiagram
+  autonumber
+  actor U as Browser
+  participant ST as stacks
+  participant C as Rails.cache (10 min)
+  participant PU as purl
+  participant S3 as Weka S3 (stacks content)
+  participant M as sdr-metrics-api
+
+  U->>ST: GET /file/:druid/:filename
+  ST->>C: public json for druid?
+  alt cache miss
+    ST->>PU: GET /:druid.json
+    PU->>S3: GET versions/cocina.N.json
+    PU-->>ST: public cocina
+    ST->>C: store for 10 min
+  end
+  ST->>ST: find file, read access (view, download, location)
+  ST->>ST: CocinaAbility check (world, stanford, location, service JWT)
+  alt not allowed
+    ST-->>U: 401 or 403 (login link for stanford-only)
+  else allowed
+    ST->>M: TrackDownloadJob POST /ahoy/events (async)
+    ST->>S3: GET content/md5 (Range if requested)
+    S3-->>ST: bytes
+    ST-->>U: 200 or 206 stream
+  end

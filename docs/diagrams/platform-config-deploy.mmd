@@ -1,0 +1,47 @@
+flowchart LR
+  subgraph Provision["Provisioning (ops-run)"]
+    PUP["puppet repo (per-host and shared hiera data)"]
+    VAULT[("Vault vault.sul.stanford.edu")]
+    PSRV["puppetserver + PuppetDB"]
+  end
+
+  SC[("shared_configs repo (one branch per app and env)")]
+  APP["app repo (config/settings.yml, config/deploy)"]
+
+  subgraph Release["Release tooling"]
+    SDRD["sdr-deploy on sdr-infra (rel-YYYY-MM-DD tag)"]
+    JEN["Jenkins sul-ci-prod"]
+    CAP["Capistrano + dlss-capistrano + capistrano-shared_configs"]
+    KAM["Kamal via bin/kamal-otk (argo-b3)"]
+  end
+
+  subgraph Host["App VM"]
+    ENV["app user env vars (secrets)"]
+    SHARED["shared/ dir (settings, honeybadger.yml)"]
+    REL["current release"]
+    CONT["argo-b3 containers"]
+  end
+
+  PUP --> PSRV
+  VAULT -->|"hiera-vault lookups"| PSRV
+  PSRV -->|"puppet catalog"| ENV
+  SC -->|"one-time clone + hard-link at provisioning"| SHARED
+  SDRD -->|"cap ENV deploy"| CAP
+  SDRD -->|"kamal deploy"| KAM
+  JEN -->|"access apps, H3; main to stage, v* tag to prod"| CAP
+  JEN -->|"main to stage"| KAM
+  APP --> CAP
+  APP --> KAM
+  CAP -->|"shared_configs:update (git pull + cp -rlf)"| SHARED
+  CAP -->|"SSH: release, migrate, restart"| REL
+  VAULT -->|"secrets at deploy time"| KAM
+  KAM -->|"SSH + local registry"| CONT
+  SHARED -.->|"linked_files"| REL
+  ENV -.-> REL
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+  class PSRV,SDRD,JEN,CAP,KAM,REL,CONT app;
+  class VAULT,SC,ENV,SHARED store;
+  class PUP,APP ext;

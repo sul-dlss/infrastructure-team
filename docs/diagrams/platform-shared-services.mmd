@@ -1,0 +1,50 @@
+flowchart LR
+  subgraph SDR["SDR stacks"]
+    DSA["dor-services-app"]
+    ARGO["Argo / argo-b3"]
+    H3["H3, pre-assembly"]
+    PC["preservation_catalog"]
+    ROB["robots (common-accessioning, preservation_robots, gis, was)"]
+  end
+
+  subgraph ACC["Access stacks"]
+    PF["purl-fetcher"]
+    RD["purl, stacks"]
+    IDX["SearchWorks / EarthWorks indexers"]
+  end
+
+  subgraph OPS["Ops-owned shared services"]
+    MQ[["RabbitMQ sul-rabbit-{qa,stage,prod}"]]
+    SOLR[("SolrCloud sul-solr + ZooKeeper")]
+    KAFKA[["Kafka sul-kafka-{stage,prod}-a"]]
+    WEKA[("Weka S3")]
+    NFS[("Shared NFS storage")]
+    CEPH[("Ceph: CephFS + NFS")]
+    VAULT[("Vault")]
+  end
+
+  DSA -->|"AMQP"| MQ
+  H3 -->|"AMQP"| MQ
+  PC -->|"AMQP"| MQ
+  ARGO -->|"AMQP"| MQ
+  DSA -->|"HTTPS argo_ENV"| SOLR
+  ARGO -->|"HTTPS argo_ENV"| SOLR
+  IDX -->|"HTTPS"| SOLR
+  PF -->|"Kafka"| KAFKA
+  KAFKA -->|"Kafka"| IDX
+  DSA -->|"NFS /dor"| NFS
+  ROB -->|"NFS /dor"| NFS
+  H3 -->|"NFS"| NFS
+  PF -->|"NFS /stacks"| NFS
+  RD -->|"S3"| WEKA
+  PC -->|"CephFS Moab roots"| CEPH
+  ROB -->|"CephFS Moab roots"| CEPH
+  DSA -.->|"pg_dump backups"| CEPH
+  VAULT -.->|"secrets via puppet"| SDR
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef queue fill:#eefbea,stroke:#2f855a;
+  class DSA,ARGO,H3,PC,ROB,PF,RD,IDX app;
+  class SOLR,WEKA,NFS,CEPH,VAULT store;
+  class MQ,KAFKA queue;

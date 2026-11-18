@@ -1,0 +1,32 @@
+sequenceDiagram
+  autonumber
+  actor U as Depositor or staff
+  participant APP as Deposit app (H3, Argo-B3, sdr-api)
+  participant DSA as DSA
+  participant ROB as Robots (common-accessioning)
+  participant PF as purl-fetcher
+  participant PRES as preservation_robots and pres cat
+  participant MQ as RabbitMQ
+  participant K as Kafka and indexers
+
+  U->>APP: describe item, upload files
+  APP->>DSA: POST /v1/objects (HTTPS JWT)
+  DSA-->>APP: druid, version 1 open
+  APP->>APP: stage files on NFS
+  APP->>DSA: close version (or start assemblyWF)
+  DSA->>ROB: accessionWF steps (Sidekiq)
+  ROB->>DSA: step status (HTTPS)
+  DSA->>PF: publish: PUT /v1/purls/:druid
+  PF->>PF: write /stacks, public cocina and XML
+  par after publish: release
+    DSA->>PF: releaseWF: release tags
+    PF->>K: release message (Kafka)
+    K->>K: index into SearchWorks or EarthWorks Solr
+  and preservation
+    DSA->>PRES: sdr-ingest-transfer: bag in /dor/export
+    PRES->>PRES: build Moab, validate, catalog
+    PRES->>DSA: complete sdr-ingest-received
+  end
+  DSA->>MQ: end-accession.completed (AMQP)
+  MQ-->>APP: deposit complete
+  Note over PRES: Later and asynchronously: replicate zip parts to AWS and GCP

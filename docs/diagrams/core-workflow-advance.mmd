@@ -1,0 +1,28 @@
+sequenceDiagram
+  autonumber
+  participant R1 as Robot finishing step A
+  participant API as DSA web (WorkflowProcessesController)
+  participant WF as PG workflow (workflow_steps)
+  participant NS as Workflow::NextStepService
+  participant RR as Robots Redis
+  participant R2 as Robot for step B
+  participant SOLR as Solr argo_env
+  participant MQ as RabbitMQ sdr.workflow
+
+  R1->>API: PUT /v1/objects/druid/workflows/wf/processes/A status completed
+  API->>WF: update step A in a transaction
+  API->>NS: enqueue_next_steps(step A)
+  NS->>WF: find waiting steps whose prerequisites are complete
+  NS->>WF: lock rows, set status queued
+  NS->>RR: QueueService.enqueue: push job to queue wf_lane or wf_process_lane
+  opt step errored or accessionWF end-accession completed
+    NS->>MQ: publish process.status
+  end
+  NS->>SOLR: Indexer.reindex_by_druid (synchronous)
+  RR->>R2: Sidekiq worker pops job
+  R2->>API: PUT processes/B status started
+  API->>NS: enqueue_next_steps (nothing new ready, reindex)
+  R2->>R2: perform_work
+  R2->>API: PUT processes/B status completed (or error)
+  API->>NS: enqueue_next_steps(step B), repeat
+  Note over R2,API: DSA-hosted robots update WF in-process via Workflow::ProcessService instead of HTTP

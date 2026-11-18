@@ -1,0 +1,28 @@
+sequenceDiagram
+  autonumber
+  participant DSA as DSA (sdr-ingest-transfer robot)
+  participant EXP as /dor/export (NFS)
+  participant RR as robots Redis
+  participant PR as preservation_robots
+  participant ST as Moab storage root
+  participant PC as pres cat API
+  participant PQ as pres cat Sidekiq
+
+  DSA->>PC: signature_catalog (HTTPS JWT)
+  DSA->>EXP: write Moab deposit bag for druid
+  DSA->>RR: create preservationIngestWF, enqueue transfer-object
+  RR->>PR: transfer-object
+  PR->>ST: cp -rL bag to root/deposit/druid
+  RR->>PR: validate-bag, then update-moab
+  PR->>ST: ingest_bag writes vNNNN, verify
+  RR->>PR: validate-moab
+  PR->>PC: GET validate_moab with lane-id
+  Note over PR: returns noop, step left started
+  PC->>PQ: ValidateMoabJob on validate_moab_lane
+  PQ->>ST: validate Moab and checksums
+  PQ->>DSA: validate-moab completed or error (HTTPS)
+  RR->>PR: update-catalog
+  PR->>PC: POST or PATCH /v1/catalog
+  PC->>PQ: enqueue ReplicationJob
+  RR->>PR: complete-ingest
+  PR->>DSA: accessionWF sdr-ingest-received completed

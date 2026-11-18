@@ -1,0 +1,92 @@
+erDiagram
+  repository_objects ||--|{ repository_object_versions : "has versions"
+  repository_objects |o--o| repository_object_versions : "head, last_closed, opened pointers"
+  repository_object_versions ||--o{ user_versions : "published as"
+  tag_labels ||--o{ administrative_tags : "applied as"
+  repository_objects ||..o{ events : "druid"
+  repository_objects ||..o{ release_tags : "druid"
+  repository_objects ||..o{ administrative_tags : "druid"
+  repository_objects ||..o{ orcid_works : "druid"
+  repository_objects ||..o{ workflow_steps : "druid (workflow DB)"
+  version_contexts ||..o{ workflow_steps : "druid and version"
+  repository_objects {
+    bigint id PK
+    enum object_type "dro, admin_policy, collection"
+    string external_identifier UK "druid"
+    string source_id UK
+    int lock
+    bigint head_version_id FK
+    bigint last_closed_version_id FK
+    bigint opened_version_id FK
+  }
+  repository_object_versions {
+    bigint id PK
+    bigint repository_object_id FK
+    int version "system version"
+    string version_description
+    string cocina_version
+    string content_type
+    jsonb access
+    jsonb administrative
+    jsonb description
+    jsonb identification
+    jsonb structural
+    jsonb geographic
+    timestamp closed_at "null while open"
+    int lock
+  }
+  user_versions {
+    bigint id PK
+    bigint repository_object_version_id FK
+    int version "public version"
+    string state "available, withdrawn, permanently_withdrawn"
+  }
+  events {
+    bigint id PK
+    string druid
+    string event_type
+    jsonb data
+    timestamp created_at
+  }
+  release_tags {
+    bigint id PK
+    string druid
+    string who
+    string what "self or collection"
+    string released_to
+    bool release
+  }
+  administrative_tags {
+    bigint id PK
+    string druid
+    bigint tag_label_id FK
+  }
+  tag_labels {
+    bigint id PK
+    string tag UK
+  }
+  orcid_works {
+    bigint id PK
+    string orcidid
+    string druid
+    string put_code
+    string md5
+  }
+  workflow_steps {
+    bigint id PK
+    string druid
+    string workflow
+    string process
+    string status
+    string lifecycle
+    int version "system version"
+    bool active_version
+    string lane_id
+    int attempts
+  }
+  version_contexts {
+    bigint id PK
+    string druid
+    int version
+    jsonb values
+  }

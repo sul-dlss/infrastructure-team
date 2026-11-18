@@ -1,0 +1,41 @@
+flowchart LR
+  USER(["Browser or viewer"])
+  EXTSITES["SearchWorks, EarthWorks, Exhibits, DLME, Arclight"]
+
+  subgraph web["Public web services (prod)"]
+    PURL["purl (sul-purl-prod-a/b)"]
+    STACKS["stacks (sul-stacks-prod-a..c)"]
+    EMBED["sul-embed (embed-prod-a/b)"]
+    IMG["Cantaloupe image server"]
+    WOWZA["Wowza"]
+    PYWB["was-pywb SWAP (was-pywb-prod)"]
+    MET["sdr-metrics-api"]
+  end
+
+  subgraph storage["Storage"]
+    S3[("S3 (stacks content)")]
+    WAS[("/web-archiving-stacks mount")]
+  end
+
+  USER -- "HTTPS pages, json, IIIF manifests" --> PURL
+  USER -- "HTTPS files, IIIF images, auth" --> STACKS
+  USER -- "HTTPS iframe" --> EMBED
+  USER -- "HLS with SecureToken" --> WOWZA
+  USER -- "HTTPS replay" --> PYWB
+  EXTSITES -- "oEmbed, iframe" --> EMBED
+  EMBED -- "public json" --> PURL
+  EMBED -- "files, images, auth probe" --> STACKS
+  STACKS -- "public json for rights" --> PURL
+  STACKS -- "IIIF proxy" --> IMG
+  STACKS -- "download events" --> MET
+  EMBED -- "view events (JS)" --> MET
+  PURL -- "S3 GET versions/*" --> S3
+  STACKS -- "S3 range GET content/md5" --> S3
+  PYWB -- "read WARC, CDXJ" --> WAS
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+  class PURL,STACKS,EMBED,IMG,WOWZA,PYWB,MET app;
+  class S3,WAS store;
+  class USER,EXTSITES ext;

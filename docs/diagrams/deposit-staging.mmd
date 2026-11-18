@@ -1,0 +1,48 @@
+flowchart LR
+  subgraph Sources
+    BR["Browser upload"]:::ext
+    GL[("Globus (prod server)")]:::store
+    LAB[("Lab and vendor mounts: /spec*, /thumpers, /maps, ...")]:::store
+    WARC[("/was_unaccessioned_data")]:::store
+  end
+
+  subgraph Upload_areas["App upload areas"]
+    H3F[("H3 Active Storage")]:::store
+    B3F[("/data/argo-files")]:::store
+    SAF[("sdr-api Active Storage")]:::store
+    ETDF[("/opt/app/etd/workspace")]:::store
+  end
+
+  subgraph Staging["Staging roots read by robots"]
+    STG[("/sdr-deposit-staging")]:::store
+    ASM[("/dor/assembly")]:::store
+    WS[("/dor/workspace")]:::store
+    GIS[("/gis_workflow_data/stage")]:::store
+  end
+
+  ROB["assembly and accessioning robots"]:::app
+
+  BR --> H3F
+  BR --> B3F
+  BR -->|"HTTPS direct upload"| SAF
+  BR --> ETDF
+  H3F -->|"H3 stager"| STG
+  B3F -->|"Argo-B3 StageFilesJob"| STG
+  GL -->|"H3"| STG
+  GL -->|"Argo-B3: argo_ingest"| STG
+  GL -->|"sdr-api"| WS
+  GL -->|"pre-assembly"| ASM
+  LAB -->|"pre-assembly, Argo-B3 MID"| ASM
+  LAB -->|"geo items"| GIS
+  WARC -->|"WAS robots, wasCrawlPreassemblyWF"| WS
+  SAF -->|"sdr-api StageBlobs"| WS
+  ETDF -->|"ETD StartAccessionJob"| WS
+  STG -->|"NFS"| ROB
+  ASM -->|"NFS"| ROB
+  WS -->|"NFS"| ROB
+  GIS -->|"NFS"| ROB
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+  classDef queue fill:#eefbea,stroke:#2f855a;

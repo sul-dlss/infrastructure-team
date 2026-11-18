@@ -1,0 +1,41 @@
+flowchart LR
+  subgraph DSA["dor-services-app (web and worker VMs)"]
+    API["Workflow API (PUT process status)"]:::app
+    NSS["NextStepService and QueueService"]:::app
+    WFDB[("workflow Postgres DB")]:::store
+    DSAR["DSA robot Sidekiq (label robot)"]:::app
+  end
+  RR{{"robots Redis, one per env (Sidekiq queues)"}}:::queue
+  subgraph HOSTS["Robot VMs (lyber-core, Sidekiq Pro)"]
+    CA["common-accessioning-env-a..f"]:::app
+    GIS["kurma-robots-env-01 (gis-robot-suite)"]:::app
+    WAS["was-robots1-env"]:::app
+    PR["preservation-robots1-env"]:::app
+  end
+  EXT["External completers: techmd, abbyy_watcher, speech_to_text_watcher, pres cat"]:::ext
+  RC["robot-console-env (Sidekiq Web)"]:::app
+  MQ{{"RabbitMQ sdr.workflow"}}:::queue
+  SOLR[("Argo Solr index")]:::store
+
+  API --> WFDB
+  API --> NSS
+  NSS -->|"push job (class, druid, version), Redis"| RR
+  RR -->|"super_fetch"| CA
+  RR --> GIS
+  RR --> WAS
+  RR --> PR
+  RR --> DSAR
+  CA -->|"status, HTTPS JWT"| API
+  GIS -->|"status, HTTPS JWT"| API
+  WAS -->|"status, HTTPS JWT"| API
+  PR -->|"status, HTTPS JWT"| API
+  EXT -->|"complete left-started steps, HTTPS"| API
+  DSAR -->|"in-process ProcessService"| NSS
+  NSS -->|"errors and end-accession, AMQP"| MQ
+  NSS -->|"reindex, HTTP"| SOLR
+  RC -->|Redis| RR
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+  classDef queue fill:#eefbea,stroke:#2f855a;

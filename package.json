@@ -1,0 +1,11 @@
+{
+  "name": "infrastructure-team-docs",
+  "private": true,
+  "description": "Tooling for rendering the architecture diagrams in docs/diagrams",
+  "scripts": {
+    "diagrams": "scripts/render_diagrams.sh"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.4.0"
+  }
+}
