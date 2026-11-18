@@ -1,0 +1,63 @@
+flowchart LR
+  ARGO["Argo / Argo-B3 release tags"]
+  DSA["DSA releaseWF release-publish"]
+  PF["purl-fetcher"]
+  FOLIO["FOLIO loader (sw-indexing cron)"]
+
+  subgraph kafka["Kafka sul-kafka-prod-a"]
+    T1{{"purl_fetcher_prod"}}
+    T2{{"EarthWorks release topic"}}
+    T3{{"sitemap_release_prod"}}
+    T4{{"marc_folio_prod"}}
+  end
+
+  TJ["searchworks_traject_indexer (sw-indexing-prod-a)"]
+  EWW["earthworks-worker SdrConsumer"]
+  CSC["content_search PublishConsumer"]
+  SMAP["purl monthly sitemap job"]
+  PURL["purl public json"]
+  EXH["Exhibits DorHarvester"]
+
+  subgraph solr["SolrCloud sul-solr"]
+    C1[("searchworks-prod-2025")]
+    C2[("sw-preview-prod")]
+    C3[("earthworks-aardvark-prod")]
+    C4[("content_search prod")]
+    C5[("exhibits_prod")]
+  end
+
+  SW["SearchWorks"]
+  EW["EarthWorks"]
+  EXW["Exhibits web"]
+
+  ARGO -- HTTPS --> DSA
+  DSA -- "PUT release_tags" --> PF
+  PF -- Kafka --> T1
+  PF -- Kafka --> T2
+  PF -- Kafka --> T3
+  FOLIO -- Kafka --> T4
+  T1 --> TJ
+  T4 --> TJ
+  T2 --> EWW
+  T1 --> CSC
+  T3 --> SMAP
+  TJ -- "fetch cocina" --> PURL
+  EWW -- "fetch cocina" --> PURL
+  EXH -- "fetch cocina" --> PURL
+  TJ --> C1
+  TJ --> C2
+  EWW --> C3
+  CSC -- "delete cached OCR" --> C4
+  EXH -- Sidekiq --> C5
+  C1 --> SW
+  C3 --> EW
+  C5 --> EXW
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+  classDef queue fill:#eefbea,stroke:#2f855a;
+  class DSA,PF,TJ,EWW,CSC,SMAP,PURL,EXH,SW,EW,EXW app;
+  class C1,C2,C3,C4,C5 store;
+  class ARGO,FOLIO ext;
+  class T1,T2,T3,T4 queue;

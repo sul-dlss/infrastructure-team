@@ -1,0 +1,27 @@
+flowchart LR
+  classDef safe fill:#eefbea,stroke:#2f855a;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef oneway fill:#fdecea,stroke:#c53030;
+
+  P0["0 Decide and record: in place, sha256, layout"]:::safe
+  P1["1 Seam: all Moab consumers via pres cat"]:::safe
+  P2["2 Shadow inventories and round-trip reports"]:::safe
+  P3["3 Hybrid-aware validators and dual-writing robots"]:::safe
+  P4["4 Add root OCFL inventory per object, per storage root"]:::store
+  P5["5 Readers prefer OCFL, fall back to Moab"]:::app
+  P6["6 New versions OCFL-native only: one-way"]:::oneway
+  P7["7 Full audit, restore drill, retire Moab code"]:::app
+
+  P0 --> P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7
+
+  subgraph NoStorageWrites["Code and reports only: no preservation storage writes"]
+    P0
+    P1
+    P2
+    P3
+  end
+  subgraph Revertible["Additive and revertible: bitstreams untouched"]
+    P4
+    P5
+  end

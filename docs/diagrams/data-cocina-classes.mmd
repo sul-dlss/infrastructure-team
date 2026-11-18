@@ -1,0 +1,127 @@
+classDiagram
+  direction LR
+  class DRO {
+    cocinaVersion
+    type : content type URI
+    externalIdentifier : druid
+    version : system version
+  }
+  class Collection {
+    type : collection etc.
+    access : CollectionAccess
+  }
+  class AdminPolicy {
+    type : admin_policy
+  }
+  class DROAccess {
+    view
+    download
+    location
+    controlledDigitalLending
+    copyright
+    useAndReproductionStatement
+    license
+  }
+  class Embargo {
+    releaseDate
+    view
+    download
+  }
+  class Administrative {
+    hasAdminPolicy : druid
+  }
+  class AdminPolicyAdministrative {
+    hasAdminPolicy : druid
+    hasAgreement : druid
+    registrationWorkflow
+    disseminationWorkflow
+    collectionsForRegistration
+  }
+  class AccessTemplate {
+    view
+    download
+    location
+    license
+  }
+  class AccessRole {
+    name : dor-apo-manager etc.
+  }
+  class AccessRoleMember {
+    type : sunetid or workgroup
+    identifier
+  }
+  class Identification {
+    sourceId
+    barcode
+    doi
+  }
+  class CatalogLink {
+    catalog : folio
+    catalogRecordId : HRID
+    refresh
+  }
+  class Description {
+    title
+    contributor
+    event
+    form
+    subject
+    relatedResource
+    adminMetadata
+    purl
+  }
+  class DROStructural {
+    isMemberOf : collection druids
+  }
+  class Sequence {
+    members : druids
+    viewingDirection
+  }
+  class FileSet {
+    externalIdentifier
+    type : resources type
+    label
+  }
+  class File {
+    externalIdentifier
+    filename
+    size
+    hasMimeType
+    use
+    languageTag
+  }
+  class FileAccess {
+    view
+    download
+    location
+  }
+  class FileAdministrative {
+    publish
+    shelve
+    sdrPreserve
+  }
+  class Geographic {
+    iso19139
+  }
+  DRO --> DROAccess
+  DROAccess --> "0..1" Embargo
+  DRO --> Administrative
+  DRO --> Description
+  DRO --> Identification
+  Identification --> "*" CatalogLink
+  DRO --> DROStructural
+  DRO --> "0..1" Geographic
+  DROStructural --> "*" FileSet : contains
+  DROStructural --> "*" Sequence : hasMemberOrders
+  FileSet --> "*" File : contains
+  File --> FileAccess
+  File --> FileAdministrative
+  Collection --> Administrative
+  Collection --> Description
+  AdminPolicy --> AdminPolicyAdministrative
+  AdminPolicy --> Description
+  AdminPolicyAdministrative --> AccessTemplate
+  AdminPolicyAdministrative --> "*" AccessRole
+  AccessRole --> "*" AccessRoleMember
+  Administrative ..> AdminPolicy : hasAdminPolicy
+  DROStructural ..> Collection : isMemberOf

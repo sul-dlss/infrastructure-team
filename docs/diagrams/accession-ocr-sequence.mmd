@@ -1,0 +1,33 @@
+sequenceDiagram
+  autonumber
+  participant EA as end-accession (common-accessioning)
+  participant DSA as DSA workflow engine
+  participant RR as robots Redis
+  participant CA as ocrWF robots (common-accessioning)
+  participant PC as preservation-catalog
+  participant SH as /abbyy CIFS share
+  participant AB as ABBYY server (Windows)
+  participant W as abbyy_watcher (-a host)
+
+  EA->>DSA: create ocrWF for version+1 (context runOCR)
+  DSA->>RR: enqueue start-ocr
+  RR->>CA: start-ocr
+  CA->>DSA: open new version, mark completed
+  DSA->>RR: enqueue fetch-files
+  RR->>CA: fetch-files
+  CA->>PC: GET preserved files (HTTPS)
+  CA->>SH: write images to INPUT/druid
+  RR->>CA: xml-ticket-create
+  CA->>SH: write ABBYY XML ticket to INPUT
+  RR->>CA: ocr-create
+  Note over CA: returns noop, step left started
+  AB->>SH: read ticket and images from INPUT
+  AB->>SH: write OCR to OUTPUT, report to RESULTXML or EXCEPTIONS
+  W->>SH: poll RESULTXML and EXCEPTIONS
+  W->>DSA: ocr-create completed or error, plus event (HTTPS)
+  DSA->>RR: enqueue split-ocr-xml
+  RR->>CA: split-ocr-xml, stage-files, update-cocina, ocr-workspace-cleanup
+  CA->>DSA: save cocina structural with OCR files
+  RR->>CA: end-ocr
+  CA->>DSA: close version
+  DSA->>RR: start accessionWF for version+1 (runOCR removed)

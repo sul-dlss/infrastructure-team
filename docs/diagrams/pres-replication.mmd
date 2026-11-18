@@ -1,0 +1,45 @@
+flowchart LR
+  ROOT[("Moab storage root")]:::store
+  PCDB[("pres cat Postgres pres")]:::store
+  RJ["ReplicationJob (queue replication)"]:::app
+  ZS[("zip cache (zip_storage)")]:::store
+  RA["ReplicationAuditJob (queue moab_replication_audit)"]:::app
+  CRON["whenever cron: daily slice, weekly expired"]:::app
+  MQ{{"RabbitMQ sdr.objects.event to dsa.create-event"}}:::queue
+  DSA["DSA events"]:::app
+  HB["Honeybadger"]:::ext
+
+  subgraph PROD["prod endpoints"]
+    P1[("AWS S3 us-west-2")]:::ext
+    P2[("AWS S3 us-east-1")]:::ext
+    P3[("GCP us-south1")]:::ext
+  end
+  subgraph STAGE["stage endpoints"]
+    S1[("AWS S3 us-west-2")]:::ext
+    S2[("AWS S3 us-east-1")]:::ext
+    S3[("GCP us-south1")]:::ext
+  end
+  subgraph QA["qa endpoints"]
+    Q1[("AWS S3 us-west-2")]:::ext
+    Q2[("AWS S3 us-east-1")]:::ext
+    Q3[("GCP us-south1")]:::ext
+  end
+
+  ROOT -->|"zip -r0X -s 10g"| RJ
+  RJ --> ZS
+  RJ -->|"ZippedMoabVersion, ZipPart rows"| PCDB
+  ZS -->|"S3 upload with md5 metadata"| PROD
+  ZS -->|"S3 upload (env config)"| STAGE
+  ZS -->|"S3 upload (env config)"| QA
+  RJ -->|"druid_version_replicated, AMQP"| MQ
+  CRON --> RA
+  RA -->|"HEAD parts, compare md5 metadata"| PROD
+  RA -->|"re-enqueue if incomplete"| RJ
+  RA -->|"audit results, AMQP"| MQ
+  RA -->|"failure codes"| HB
+  MQ --> DSA
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+  classDef queue fill:#eefbea,stroke:#2f855a;

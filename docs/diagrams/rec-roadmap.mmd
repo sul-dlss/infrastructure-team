@@ -1,0 +1,45 @@
+flowchart LR
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+
+  subgraph Now["Now: small, high-value"]
+    R1["R1 Remove dead messaging"]
+    R2["R2 Decommission sweep"]
+    R3["R3 DSA side effects fail soft"]
+    R8["R8 Image cache purges"]
+    R11["R11 Mandatory If-Match"]
+    R12["R12 Security gaps"]
+    R13["R13 Argo-B3 and Redis observability"]
+    R17["R17 Docs as code"]
+  end
+
+  subgraph Next["Next: this transition"]
+    R16["R16 Finish Argo-B3 transition"]
+    R6["R6 Complete discovery contract"]
+    R10["R10 Verify and rehearse preservation"]
+    R5["R5 Broker contract and Kafka risk"]
+    R15["R15 Cheaper cocina upgrades"]
+    R4["R4 DSA bulkheads"]
+    R18a["R18 OCFL phases 0-3: seam, shadow inventories, hybrid-aware code"]
+  end
+
+  subgraph Later["Later: larger or triggered"]
+    R7["R7 purl-fetcher writes S3"]
+    R9["R9 Environment isolation"]
+    R14["R14 Deploy and config direction"]
+    R18b["R18 OCFL phases 4-7: adopt in place, switch, retire Moab"]
+  end
+
+  R13 --> R16
+  R2 --> R16
+  R3 --> R4
+  R6 --> R7
+  R16 --> R14
+  R7 --> R9
+  R16 --> R9
+  R18a --> R18b
+  R10 --> R18b
+  R2 --> R18b
+
+  class R1,R2,R3,R8,R11,R12,R13,R17,R16,R6,R10,R5,R15,R4,R7,R9,R14,R18a,R18b app;

@@ -1,0 +1,23 @@
+sequenceDiagram
+  participant C as Client (argo-b3, H3, sdr-api)
+  participant D as DSA API
+  participant DB as DSA primary DB
+  participant WF as accessionWF
+  participant PF as purl-fetcher
+  C->>D: POST /v1/objects/:druid/versions (open)
+  D->>DB: copy last closed version to version N+1, opened pointer
+  D-->>C: cocina with version N+1
+  C->>D: GET /v1/objects/:druid
+  D-->>C: DROWithMetadata, ETag = external lock
+  C->>D: PATCH /v1/objects/:druid with If-Match
+  alt lock matches
+    D->>DB: update jsonb columns of open version, bump lock
+    D-->>C: 200 with new ETag
+  else lock stale
+    D-->>C: 412 ETag mismatch
+  end
+  C->>D: POST /v1/objects/:druid/versions/current/close
+  D->>DB: set closed_at, move head and last_closed pointers
+  D->>DB: create or move user version per user_version_mode
+  D->>WF: start accessionWF for version N+1
+  WF->>PF: publish user version M (PUT /v1/purls/:druid)

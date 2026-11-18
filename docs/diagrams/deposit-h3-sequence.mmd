@@ -1,0 +1,45 @@
+sequenceDiagram
+  autonumber
+  actor U as Depositor
+  participant AP as Apache and Shibboleth
+  participant H3 as H3 web
+  participant GL as Globus (prod server)
+  participant J as H3 DepositWorkJob (Solid Queue)
+  participant FS as /sdr-deposit-staging (NFS)
+  participant DSA as DSA
+  participant SURI as SURI
+  participant MQ as RabbitMQ
+  participant RR as Robots Redis
+
+  U->>AP: GET /webauth/login
+  AP->>H3: X-Remote-User, X-Groups, X-Orcid-Id headers
+  alt browser upload
+    U->>H3: upload files (Active Storage)
+  else Globus upload
+    H3->>GL: GlobusSetupJob: mkdir, allow writes
+    U->>GL: transfer files to the per-work Globus directory
+  end
+  U->>H3: Deposit
+  H3->>J: enqueue DepositWorkJob
+  opt Globus files
+    J->>GL: disallow writes
+  end
+  J->>J: Contents::Analyzer adds digests and mime types
+  alt new work
+    J->>DSA: POST /v1/objects (assign_doi)
+    DSA->>SURI: POST /identifiers
+    SURI-->>DSA: druid
+    DSA-->>J: cocina object, version 1 open
+    J->>DSA: create registrationWF
+  else existing work
+    J->>DSA: open version if needed, PATCH /v1/objects/druid with If-Match
+  end
+  J->>FS: Contents::Stager copies files to druid tree
+  opt Globus files
+    J->>MQ: sdr.objects.event h3_globus_staged
+  end
+  J->>DSA: POST versions/current/close
+  DSA->>DSA: create accessionWF steps in workflow DB
+  DSA->>RR: enqueue accessionWF_start-accession job
+  Note over RR: common-accessioning picks up the job, accessioning has started
+  Note over MQ,H3: Later: end-accession.completed on sdr.workflow reaches h3.deposit_complete

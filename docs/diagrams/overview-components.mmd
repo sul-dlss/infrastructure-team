@@ -1,0 +1,58 @@
+flowchart LR
+  subgraph MGMT["Management and deposit"]
+    ARGO["Argo (legacy)"]:::app
+    B3["Argo-B3"]:::app
+    PRE["pre-assembly (legacy)"]:::app
+    H3["H3 self-deposit"]:::app
+    API["sdr-api"]:::app
+    ETD["Heracles ETD"]:::app
+    GB["Google Books, sdr-client"]:::app
+    WRA["was-registrar-app"]:::app
+  end
+
+  subgraph CORE["Repository core"]
+    DSA["dor-services-app (DSA)"]:::app
+    SURI["SURI"]:::app
+    TMD["technical-metadata-service"]:::app
+    MQ{{"RabbitMQ"}}:::queue
+    RR[("robots Redis")]:::store
+    SOLR[("Solr argo_env")]:::store
+  end
+
+  subgraph ACC["Accessioning"]
+    CA["common-accessioning"]:::app
+    GIS["gis-robot-suite"]:::app
+    WAS["was_robot_suite"]:::app
+  end
+
+  subgraph PRES["Preservation"]
+    PR["preservation_robots"]:::app
+    PC["preservation-catalog"]:::app
+  end
+
+  NFS[("NFS: /dor, staging mounts")]:::store
+  PF["purl-fetcher (access)"]:::app
+  CLOUD["AWS and GCP buckets"]:::ext
+
+  ARGO & B3 & PRE & H3 & ETD & WRA -->|"HTTPS JWT"| DSA
+  GB -->|"HTTPS"| API
+  API -->|"HTTPS JWT"| DSA
+  ARGO & B3 -->|"Solr query"| SOLR
+  DSA -->|"RSolr"| SOLR
+  DSA -->|"HTTPS"| SURI
+  DSA -->|"Sidekiq push"| RR
+  RR -->|"Sidekiq"| CA & GIS & WAS & PR
+  CA & GIS & WAS & PR -->|"step status, HTTPS JWT"| DSA
+  CA -->|"HTTPS"| TMD
+  DSA -->|"AMQP"| MQ
+  MQ -->|"AMQP: end-accession"| H3 & PRE
+  PR -->|"HTTPS JWT"| PC
+  PC -->|"S3 zip parts"| CLOUD
+  DSA -->|"HTTPS and NFS"| PF
+  MGMT -.->|"NFS"| NFS
+  ACC -.->|"NFS"| NFS
+
+  classDef app fill:#e8f1fb,stroke:#2b6cb0;
+  classDef store fill:#fef6e4,stroke:#b7791f;
+  classDef ext fill:#f0f0f0,stroke:#666,stroke-dasharray:4 3;
+  classDef queue fill:#eefbea,stroke:#2f855a;

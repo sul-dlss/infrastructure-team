@@ -1,0 +1,29 @@
+sequenceDiagram
+  autonumber
+  participant DSA as DSA accessionWF publish
+  participant PRES as Preservation
+  participant AT as Transfer stage (shared NFS mount)
+  participant PF as purl-fetcher
+  participant DB as purl-fetcher MySQL
+  participant FS as /stacks (shared mount)
+  participant IMG as Cantaloupe
+  participant K as Kafka
+
+  DSA->>PF: GET /v1/purls/:druid (md5s already shelved)
+  PF-->>DSA: files_by_md5
+  opt file missing from /dor/workspace
+    DSA->>PRES: content_to_file
+  end
+  DSA->>AT: copy new files as UUID names
+  DSA->>PF: PUT /v1/purls/:druid (JWT, cocina, file_uploads, version)
+  PF->>DB: upsert purl row (if version is newer)
+  PF->>FS: move UUID files to content/md5
+  PF->>FS: write cocina.N.json, public.N.xml, versions.json
+  PF->>FS: delete md5s no version references
+  PF->>IMG: POST /tasks PurgeItemFromCache (each new jp2)
+  PF-->>DSA: 201 Created
+  DSA->>PF: GET /v1/purls/:druid (verify nothing missing)
+  Note over DSA,PF: Later in accessionWF: release-initiate starts releaseWF
+  DSA->>PF: PUT /v1/purls/:druid/release_tags (index, delete)
+  PF->>FS: write versions/meta.json
+  PF->>K: produce public JSON to each ever-released target topic
